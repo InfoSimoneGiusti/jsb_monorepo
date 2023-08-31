@@ -14,6 +14,7 @@
       </LaravelCodeGeneration>
     </option>
     <option name="frameworkFound" value="true" />
+    <option name="laravelBasePath" value="pannello_conduttore" />
     <option name="userClassName" value="\AppModels\User" />
   </component>
 </project>

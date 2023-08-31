@@ -13,6 +13,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/send_question', function() {
+
+    $question = 'Di che colore era il cavallo bianco di Napoleone?';
+
+    $game = \App\Models\Game::find(1);
+    if (!$game) {
+        $game = new \App\Models\Game();
+        $game->save();
+    }
+
+    event(new \App\Events\SendQuestion('Di che colore era il cavallo bianco di Napoleone?', $game));
+
+});
+
 Route::get('/', function () {
     return redirect()->route('admin');
 });
