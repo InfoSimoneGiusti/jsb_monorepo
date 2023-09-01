@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}</div>
+                <div class="card-header">Area per il conduttore</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -13,12 +13,17 @@
                             {{ session('status') }}
                         </div>
                     @endif
-
-                    {{ __('You are logged in!') }}
                 </div>
+
+                <div id="app">
+                    Tempo rimanente: @{{ remaining_time }}
+                    Lista dei partecipanti: @{{ player_list }}
+                </div>
+
             </div>
         </div>
     </div>
 </div>
+
 @endsection
 

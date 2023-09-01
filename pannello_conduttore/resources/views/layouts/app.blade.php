@@ -13,6 +13,8 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
@@ -76,5 +78,8 @@
             @yield('content')
         </main>
     </div>
+
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
 </body>
 </html>
