@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
+            $table->boolean('closed')->comment('Indica se il gioco è concluso')->default(false);
             $table->timestamps();
         });
     }

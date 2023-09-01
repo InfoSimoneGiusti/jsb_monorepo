@@ -16,11 +16,14 @@ class Session extends Model
         'question',
         'timestamp',
         'end_timestamp',
+        'interrupt_timestamp',
+        'paused',
         'closed'
     ];
 
     protected $casts = [
-        'closed' => 'boolean'
+        'closed' => 'boolean',
+        'paused' => 'boolean'
     ];
     public function game() : BelongsTo {
         return $this->belongsTo(Game::class);

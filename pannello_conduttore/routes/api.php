@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+/*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-});
+});*/
+
+
+Route::post('/subscribe_current_game', [\App\Http\Controllers\Api\PlayerController::class, 'subscribe'])->name('game.subscribe');
+Route::post('/volunteer', [\App\Http\Controllers\Api\PlayerController::class, 'volunteer'])->name('game.volunteer');

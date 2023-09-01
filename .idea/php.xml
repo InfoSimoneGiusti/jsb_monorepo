@@ -127,6 +127,9 @@
       <path value="$PROJECT_DIR$/pannello_conduttore/vendor/paragonie/sodium_compat" />
       <path value="$PROJECT_DIR$/pannello_conduttore/vendor/paragonie/random_compat" />
       <path value="$PROJECT_DIR$/pannello_conduttore/vendor/pusher/pusher-php-server" />
+      <path value="$PROJECT_DIR$/pannello_conduttore/vendor/spatie/laravel-short-schedule" />
+      <path value="$PROJECT_DIR$/pannello_conduttore/vendor/spatie/temporary-directory" />
+      <path value="$PROJECT_DIR$/pannello_conduttore/vendor/react/event-loop" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />

@@ -31,6 +31,8 @@ Route::get('/', function () {
     return redirect()->route('admin');
 });
 
+
+
 Auth::routes([
     'register' => false, // Register Routes...
     'reset' => false, // Reset Password Routes...

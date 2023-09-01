@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('game_id')->constrained()->onDelete('CASCADE');
             $table->text('question');
-            $table->unsignedInteger('timestamp');
+            $table->unsignedInteger('timestamp'); //unsignedInteger arriva fino a unix epoch attorno al 2100, sufficienti per i nostri scopi ;-)
             $table->unsignedInteger('end_timestamp');
+            $table->unsignedInteger('interrupt_timestamp')->nullable();
             $table->boolean('closed')->comment('Indica se la session è conclusa')->default(false);
+            $table->boolean('paused')->comment('Indica se la session è in pausa (un giocatore si è prenotato)')->default(false);
             $table->timestamps();
         });
     }

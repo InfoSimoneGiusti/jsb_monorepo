@@ -15,6 +15,8 @@ return [
     |
     */
 
+    // Sarebbe meglio definire una regola CORS più stringente
+
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],

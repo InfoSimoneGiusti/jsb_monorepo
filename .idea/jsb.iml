@@ -126,6 +126,9 @@
       <excludeFolder url="file://$MODULE_DIR$/pannello_conduttore/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/pannello_conduttore/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/pannello_conduttore/vendor/webmozart/assert" />
+      <excludeFolder url="file://$MODULE_DIR$/pannello_conduttore/vendor/react/event-loop" />
+      <excludeFolder url="file://$MODULE_DIR$/pannello_conduttore/vendor/spatie/laravel-short-schedule" />
+      <excludeFolder url="file://$MODULE_DIR$/pannello_conduttore/vendor/spatie/temporary-directory" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

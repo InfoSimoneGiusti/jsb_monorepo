@@ -16,38 +16,45 @@ class SendQuestion implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $command = 'start-session';
+
     public $id;
     public $question;
-    public $server_time;
-    public $end_session;
+    public $remaining_time;
 
     public function __construct(string $question, Game $game)
     {
 
+        $timer = 30; // TODO meglio metterlo in un file in config + .env
+
         $this->question = $question;
-        $this->server_time = time();
-        $this->end_session = $this->server_time + 30;
+
+        $server_time = time();
+        $end_session = $server_time + $timer;
 
         $session = Session::create([
             'game_id' => $game->id,
             'question' => $question,
-            'timestamp' => $this->server_time,
-            'end_timestamp' => $this->end_session,
-            'closed' => false
+            'timestamp' => $server_time,
+            'end_timestamp' => $end_session,
+            'interrupt_timestamp' => null,
+            'closed' => false,
+            'paused' => false
         ]);
 
+        $this->remaining_time = $timer;
         $this->id = $session->id;
 
     }
 
     public function broadcastOn()
     {
-        return ['my-channel'];
+        return ['jsb-quiz-game'];
     }
 
     public function broadcastAs()
     {
-        return 'my-event';
+        return 'command';
 
     }
 }

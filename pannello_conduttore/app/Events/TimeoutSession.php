@@ -8,19 +8,22 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TerminateSession implements ShouldBroadcast
+class TimeoutSession implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $command = 'timeout-session';
+
     public $id;
-    public $command;
+    public $remaining_time;
+
     /**
      * Create a new event instance.
      */
-    public function __construct(Session $session)
+    public function __construct(Session $session, int $remaining_time)
     {
         $this->id = $session->id;
-        $this->command = 'terminate-session';
+        $this->remaining_time = $remaining_time;
     }
 
     /**
@@ -30,12 +33,12 @@ class TerminateSession implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return ['my-channel'];
+        return ['jsb-quiz-game'];
     }
 
     public function broadcastAs()
     {
-        return 'my-event';
+        return 'command';
 
     }
 }
