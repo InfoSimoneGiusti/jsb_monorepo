@@ -25,7 +25,7 @@ class SendQuestion implements ShouldBroadcast
     public function __construct(string $question, Game $game)
     {
 
-        $timer = 30; // TODO meglio metterlo in un file in config + .env
+        $timer = 3600; // TODO meglio metterlo in un file in config + .env
 
         $this->question = $question;
 
@@ -38,8 +38,7 @@ class SendQuestion implements ShouldBroadcast
             'timestamp' => $server_time,
             'end_timestamp' => $end_session,
             'interrupt_timestamp' => null,
-            'closed' => false,
-            'paused' => false
+            'closed' => false
         ]);
 
         $this->remaining_time = $timer;

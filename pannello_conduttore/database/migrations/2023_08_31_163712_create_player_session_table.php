@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('player_id')->constrained()->onDelete('CASCADE');
             $table->index(['session_id', 'player_id']);
             $table->unique(['session_id', 'player_id']);
-            $table->boolean('correct_answer');
+            $table->boolean('correct_answer')->default(false);
+            $table->text('answer')->nullable();
             $table->unsignedInteger('timestamp');
-            $table->timestamps();
         });
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,8 +31,6 @@ Route::get('/send_question', function() {
 Route::get('/', function () {
     return redirect()->route('admin');
 });
-
-
 
 Auth::routes([
     'register' => false, // Register Routes...

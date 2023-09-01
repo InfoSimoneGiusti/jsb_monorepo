@@ -19,7 +19,7 @@ class Player extends Model
     ];
 
     public function sessions() : BelongsToMany {
-        return $this->belongsToMany(Session::class)->withPivot(['correct_answer', 'timestamp']);
+        return $this->belongsToMany(Session::class)->withPivot(['correct_answer', 'timestamp', 'answer']);
     }
 
     public function game() : BelongsTo {

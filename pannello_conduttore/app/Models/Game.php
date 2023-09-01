@@ -29,19 +29,45 @@ class Game extends Model
     }
 
 
-    public function getPlayersWithScore() {
+    public function getPlayersStatus() {
 
         $game_id = $this->id;
 
-        return DB::table('players')
-            ->select('players.name as player_name', DB::raw('IFNULL(SUM(player_session.correct_answer), 0) as score'))
-            ->leftJoin('player_session', 'players.id', '=', 'player_session.player_id')
-            ->leftJoin('sessions', function ($join) use ($game_id) {
-                $join->on('player_session.session_id', '=', 'sessions.id')
-                    ->where('sessions.game_id', '=', $game_id);
-            })
-            ->groupBy('players.id')
-            ->get();
+        $currentSession = Session::getCurrentSession($this);
 
+        $players = $this->players;
+
+        $result = [];
+
+        foreach ($players as $player) {
+
+            $isVolunteer = false;
+
+            if ( $currentSession &&  $currentSession->volunteer_id == $player->id) {
+                $isVolunteer = true;
+            }
+
+            $count = DB::table('player_session')
+                ->join('sessions', 'sessions.id', '=', 'player_session.session_id')
+                ->join('games', 'games.id', '=', 'sessions.game_id')
+                ->where('game_id', $game_id)
+                ->where('player_id', $player->id)
+                ->sum('correct_answer');
+
+            $result[] = [
+                'player_id' => $player->id,
+                'player_name' => $player->name,
+                'volunteer' => $isVolunteer,
+                'score' => $count,
+                'alreadyAnswered' => $currentSession?$currentSession->players->contains($player):false
+            ];
+        }
+
+        return $result;
+
+    }
+
+    static function getOpenedGame() {
+        return Game::where('closed', false)->orderBy('created_at', 'desc')->first();
     }
 }

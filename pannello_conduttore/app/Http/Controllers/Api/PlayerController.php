@@ -6,15 +6,17 @@ use App\Events\NewPlayerSubscribed;
 use App\Http\Controllers\Controller;
 use App\Models\Game;
 use App\Models\Player;
+use App\Models\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 
 class PlayerController extends Controller
 {
     public function subscribe(Request $request) {
 
-        $lastOpenedGame = Game::where('closed', false)->orderBy('created_at', 'desc')->first();
+        $lastOpenedGame = Game::getOpenedGame();
 
         if (!$lastOpenedGame) {
             return response()->json([
@@ -54,8 +56,58 @@ class PlayerController extends Controller
 
     public function volunteer(Request $request) {
 
+        $lastOpenedGame = Game::getOpenedGame();
+
+        $player_id_encrypted = $request->get('player_id');
+
+        try {
+            $player_id = Crypt::decrypt($player_id_encrypted);
+        } catch (\Exception $e ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payload non valido... stai tentando di imbrogliare?!'
+            ], 403);
+        }
+
+        $player = Player::findOrFail($player_id);
+
+        $session = Session::getCurrentSession($lastOpenedGame);
+
+        if (!$session) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Non puoi prenotarti per questa domanda, il tempo è scaduto!'
+            ], 403);
+        }
+
+        if ($session->volunteer_id) {
+
+            $volunteer = Player::find($session->volunteer_id)->first();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Non puoi prenotarti, il concorrente ' . $volunteer->name .  ' si è già prenotato un attimo prima di te!'
+            ], 403);
+        }
+
+        //controllo se l'utente ha il diritto di prenotare la risposta
+        if (!$session->players->contains($player)) {
+
+            //se sì, interrompo il gioco
+            $session->interrupt_timestamp = time();
+            $session->volunteer_id = $player_id;
+            $session->save();
+
+            //ed invio a tutti la notifica per la mano alzata
 
 
+
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Non puoi prenotarti, hai già provato a rispondere a questa domanda!'
+            ], 403);
+        }
 
     }
 

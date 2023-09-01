@@ -32,23 +32,16 @@ class HandleSessions extends Command
 
         $sessions = Session::query()
             ->where('closed', false)
-            ->where('paused', false)
+            ->whereNull('interrupt_timestamp')
             ->get();
 
         foreach ($sessions as $session) {
 
-            $remaining_time = $session->end_timestamp - $server_time;
-
-            Log::info($remaining_time . ' - ' . $session->id);
-
-            event(new \App\Events\ClockTickSession($session, $remaining_time));
-            if ($session->end_timestamp < $server_time) {
+            event(new \App\Events\ClockTickSession($session));
+            if ($session->end_timestamp <= $server_time) {
                 $session->closed = true;
                 $session->save();
-
-                event(new \App\Events\TimeoutSession($session, $remaining_time));
-
-
+                event(new \App\Events\TimeoutSession($session));
             }
         }
 

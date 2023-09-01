@@ -17,20 +17,31 @@ class Session extends Model
         'timestamp',
         'end_timestamp',
         'interrupt_timestamp',
-        'paused',
         'closed'
     ];
 
     protected $casts = [
         'closed' => 'boolean',
-        'paused' => 'boolean'
     ];
     public function game() : BelongsTo {
         return $this->belongsTo(Game::class);
     }
 
     public function players() : BelongsToMany {
-        return $this->belongsToMany(Player::class)->withPivot(['correct_answer', 'timestamp']);
+        return $this->belongsToMany(Player::class)->withPivot(['correct_answer', 'timestamp', 'answer']);
+    }
+
+    static function getCurrentSession(Game $game) : null | Session {
+        return Session::where('game_id', $game->id)->where('closed', false)->first();
+    }
+
+    public function getRemainingTimer() {
+        $server_time = time();
+        if ($this->interrupt_timestamp) {
+            return $this->end_timestamp - $this->interrupt_timestamp;
+        } else {
+            return $this->end_timestamp - $server_time;
+        }
     }
 
 }

@@ -18,10 +18,10 @@ class ClockTickSession implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(Session $session, int $remaining_time)
+    public function __construct(Session | null $session)
     {
-        $this->id = $session->id;
-        $this->remaining_time = $remaining_time;
+        $this->id = $session->id??null;
+        $this->remaining_time = $session?$session->getRemainingTimer():0;
     }
 
     /**

@@ -20,10 +20,10 @@ class TimeoutSession implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(Session $session, int $remaining_time)
+    public function __construct(Session $session)
     {
         $this->id = $session->id;
-        $this->remaining_time = $remaining_time;
+        $this->remaining_time = 0;
     }
 
     /**
