@@ -10,20 +10,20 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewPlayerSubscribed implements ShouldBroadcast
+class PlayerVolunteer implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $new_player_name;
+    public $player_volunteer;
     public $player_list = [];
     public $question;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Player $new_player, Game $game)
+    public function __construct(Player $player_volunteer, Game $game)
     {
-        $this->new_player_name = $new_player->name;
+        $this->player_volunteer = $player_volunteer->name;
         $this->player_list = $game->getPlayersStatus();
 
         $currentSession = Session::getCurrentSession($game);

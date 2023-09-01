@@ -11,6 +11,7 @@ const question = ref(null)
 const remaining_time = ref(0)
 const player_name = ref(null)
 const player_id = ref(null)
+const plain_player_id = ref(null)
 const player_list = ref([])
 
 onMounted(() => {
@@ -52,6 +53,7 @@ const subscribe = () => {
         .then(function (response) {
           console.log(response);
           player_id.value = response.data.player_id;
+          plain_player_id.value = response.data.plain_player_id;
         })
         .catch(function (error) {
           console.log(error);
@@ -97,10 +99,28 @@ const isSomeoneVolonteer = computed(() => {
         <div class="col-8">
           <h3 class="fs-4">Tempo rimasto: {{ remaining_time }} secondi</h3>
           <h1 class="fs-5 pt-2">Domanda: {{ question }}</h1>
-          <button v-if="isSomeoneVolonteer.length === 0"  class="btn btn-outline-warning mt-5" @click="volunteer">Voglio prenotarmi 🤚</button>
-          <div v-else class="d-flex align-items-center mt-5">
-            <div class="spinner-border text-warning me-3" role="status"></div>
-            <div class="fs-5">{{isSomeoneVolonteer[0].player_name}} sta rispondendo...</div>
+          <button v-if="isSomeoneVolonteer.length === 0" class="btn btn-outline-warning mt-5" @click="volunteer">Voglio
+            prenotarmi 🤚
+          </button>
+          <div v-else class="mt-5">
+
+            <div v-if="isSomeoneVolonteer[0].plain_player_id == plain_player_id">
+              <!-- Io mi sono prenotato -->
+              <form @submit.prevent="sendanswer">
+                <div class="form-group">
+                  <label for="answer">Inserisci la risposta che ritieni corretta:</label>
+                  <textarea class="form-control w-100 mt-1" id="answer" v-model="answer"
+                            placeholder="La tua risposta"></textarea>
+                </div>
+                <button class="btn btn-primary mt-3">Invia risposta</button>
+
+              </form>
+            </div>
+            <div class="d-flex align-items-center " v-else>
+              <!-- Altri si sono prenotati -->
+              <div class="spinner-border text-warning me-3" role="status"></div>
+              <div class="fs-5">{{ isSomeoneVolonteer[0].player_name }} sta rispondendo...</div>
+            </div>
           </div>
         </div>
 
@@ -109,20 +129,22 @@ const isSomeoneVolonteer = computed(() => {
 
           <table class="table">
             <thead>
-              <tr>
-                <th scope="col"></th>
-                <th scope="col">Nome</th>
-                <th scope="col">Punteggio</th>
-                <th scope="col">Eliminato dal turno</th>
-              </tr>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Nome</th>
+              <th scope="col">Punteggio</th>
+              <th scope="col">Eliminato dal turno</th>
+            </tr>
             </thead>
             <tbody>
-              <tr v-for="player in player_list">
-                <td class="align-middle"><div class="my_raised_hand fs-3" v-if="player.volunteer">🤚</div></td>
-                <td class="align-middle">{{ player.player_name }}</td>
-                <td class="align-middle">{{ player.score }}</td>
-                <td class="align-middle">{{ player.alreadyAnswered?'❌':'' }}</td>
-              </tr>
+            <tr v-for="player in player_list">
+              <td class="align-middle">
+                <div class="my_raised_hand fs-3" v-if="player.volunteer">🤚</div>
+              </td>
+              <td class="align-middle">{{ player.player_name }}</td>
+              <td class="align-middle">{{ player.score }}</td>
+              <td class="align-middle">{{ player.alreadyAnswered ? '❌' : '' }}</td>
+            </tr>
             </tbody>
           </table>
 
@@ -134,11 +156,11 @@ const isSomeoneVolonteer = computed(() => {
         <div class="col-6 ">
           <h2 class="fs-5 text-center mb-5">Per partecipare al quiz, inserisci il tuo nome</h2>
 
-          <div class="d-flex ">
+          <form class="d-flex " @submit.prevent="subscribe">
             <input class="form-control" type="text" v-model="player_name" @keyup.enter="subscribe"
-                   placeholder="Nome del giocatore"/>
-            <button class="btn btn-primary" @click="subscribe">Partecipa</button>
-          </div>
+                   placeholder="Come ti chiami?" id="player_name"/>
+            <button class="btn btn-primary">Partecipa</button>
+          </form>
 
         </div>
       </div>

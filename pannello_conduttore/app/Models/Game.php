@@ -55,7 +55,7 @@ class Game extends Model
                 ->sum('correct_answer');
 
             $result[] = [
-                'player_id' => $player->id,
+                'plain_player_id' => $player->id,
                 'player_name' => $player->name,
                 'volunteer' => $isVolunteer,
                 'score' => $count,

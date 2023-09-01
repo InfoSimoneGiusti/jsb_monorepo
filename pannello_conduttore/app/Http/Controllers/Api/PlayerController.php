@@ -38,7 +38,8 @@ class PlayerController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Benvenuto nel gioco',
-                'player_id' => Crypt::encrypt($player->id) //questo dato mi serve in front per fare richieste via API, cripto per rendere vagamente più difficile falsificare la propria identita
+                'player_id' => Crypt::encrypt($player->id), //questo dato mi serve in front per fare richieste via API, cripto per rendere vagamente più difficile falsificare la propria identita
+                'plain_player_id' => $player->id //mi serve solo per filtrare i players in f/e e sapere chi sono io nella lista
             ]);
         }
 
@@ -99,8 +100,7 @@ class PlayerController extends Controller
             $session->save();
 
             //ed invio a tutti la notifica per la mano alzata
-
-
+            event(new \App\Events\PlayerVolunteer($player, $lastOpenedGame));
 
         } else {
             return response()->json([
