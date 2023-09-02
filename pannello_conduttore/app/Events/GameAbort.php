@@ -2,31 +2,31 @@
 
 namespace App\Events;
 
-use App\Models\Game;
 use App\Models\Session;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SendQuestion implements ShouldBroadcast
+class GameAbort implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $command = 'start-session';
+    public $command = 'game-abort';
 
-    public $question;
-    public $remaining_time;
-
-    public function __construct(Session $session)
+    /**
+     * Create a new event instance.
+     */
+    public function __construct()
     {
-        $this->question = $session->question;
-        $this->remaining_time = $session->end_timestamp - $session->timestamp;
+
     }
 
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return array<int, \Illuminate\Broadcasting\Channel>
+     */
     public function broadcastOn()
     {
         return ['jsb-quiz-game'];

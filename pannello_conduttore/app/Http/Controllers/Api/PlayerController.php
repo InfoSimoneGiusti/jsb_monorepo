@@ -112,6 +112,57 @@ class PlayerController extends Controller
     }
 
 
+
+    public function newAnswer(Request $request) {
+
+        $player_id_encrypted = $request->get('player_id');
+
+        try {
+            $player_id = Crypt::decrypt($player_id_encrypted);
+        } catch (\Exception $e ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payload non valido... stai tentando di imbrogliare?!'
+            ], 403);
+        }
+
+        $player = Player::find($player_id);
+
+        $answer =  $request->get('answer');
+
+        $game = Game::getOpenedGame();
+
+        if (!$game) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gioco non trovato'
+            ], 403);
+        }
+
+        $session = Session::getCurrentSession($game);
+
+        if (!$session) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Domanda non trovata'
+            ], 403);
+        }
+
+        //controllo se l'utente ha il diritto di prenotare la risposta
+        if (!$session->players->contains($player)) {
+            $session->players()->attach($player, ['answer' => $answer, 'timestamp' => time()]);
+            //TODO sparare un evento per notificare della risposta fornita dal player
+
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hai già risposto a questa domanda... stai tentando di imbrogliare?!'
+            ], 403);
+        }
+
+    }
+
+
     protected function calculateName($name, $game_id) {
 
         $unique_name = $name;

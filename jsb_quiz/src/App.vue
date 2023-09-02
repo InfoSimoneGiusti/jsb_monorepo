@@ -7,12 +7,14 @@ var pusher = new Pusher('71ed3d7e2ae1cf985ffd', {
   cluster: 'eu'
 });
 
-const question = ref(null)
-const remaining_time = ref(0)
-const player_name = ref(null)
-const player_id = ref(null)
-const plain_player_id = ref(null)
-const player_list = ref([])
+const question = ref(null);
+const remaining_time = ref(0);
+const player_name = ref(null);
+const player_id = ref(null);
+const plain_player_id = ref(null);
+const player_list = ref([]);
+const answer = ref("");
+const answered = false;
 
 onMounted(() => {
 
@@ -27,7 +29,11 @@ onMounted(() => {
         break;
       case 'timeout-session':
         remaining_time.value = data.remaining_time;
-        //resetta interfaccia
+        //TODO resetta interfaccia
+        break;
+      case 'game-abort':
+        alert('Il gioco è stato annullato dal conduttore');
+        //TODO resetta interfaccia
         break;
     }
 
@@ -45,6 +51,23 @@ onMounted(() => {
 });
 
 
+const sendanswer = () => {
+
+  axios.post('https://jsb.local/api/send_answer', {
+    player_id: player_id.value,
+    answer: answer.value
+  }).then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+    alert(error.response.data.message);
+  });
+
+  answered.value = true;
+
+}
+
 const subscribe = () => {
   if (player_name.value.length >= 3) {
     axios.post('https://jsb.local/api/subscribe_current_game', {
@@ -59,6 +82,7 @@ const subscribe = () => {
           console.log(error);
           alert(error.response.data.message);
         });
+
   } else {
     alert('La lunghezza minima del nome è di 3 caratteri');
   }
@@ -104,7 +128,7 @@ const isSomeoneVolonteer = computed(() => {
           </button>
           <div v-else class="mt-5">
 
-            <div v-if="isSomeoneVolonteer[0].plain_player_id == plain_player_id">
+            <div v-if="isSomeoneVolonteer[0].plain_player_id == plain_player_id && !answered">
               <!-- Io mi sono prenotato -->
               <form @submit.prevent="sendanswer">
                 <div class="form-group">

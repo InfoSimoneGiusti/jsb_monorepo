@@ -1,29 +1,105 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">Area per il conduttore</div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">Area per il conduttore</div>
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
+                    <div class="card-body">
+                        @if (session('status'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+
+                        @if($errors->any())
+                            @foreach ($errors->all() as $error)
+                                <div class="alert alert-danger">{{ $error }}</div>
+                            @endforeach
+                        @endif
+
+                        <div id="app">
+
+                            <div class="d-flex">
+
+                                <form method="POST" v-if="!current_game" action="{{route('game.new')}}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary me-2">Avvia nuovo gioco</button>
+                                </form>
+
+                                <button class="btn btn-primary me-2" v-if="!current_session && current_game" @click="show_question_panel=true" >Fai nuova domanda</button>
+
+                                <form class="ms-auto" method="POST" v-if="current_game" action="{{route('game.abort')}}" onsubmit="return confirm('Sei sicuro di voler annullare il gioco?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-danger">Annulla gioco</button>
+                                </form>
+                            </div>
+                            <hr>
+
+                            <div class="row">
+                                <div class="col-8">
+                                    <h2 class="fs-3">Domanda corrente: @{{ question }}</h2>
+                                    <h3 class="fs-4">Tempo rimanente: @{{ remaining_time }}</h3>
+                                    <div class="card mt-4" v-if="show_question_panel">
+                                        <div class="card-body" >
+                                            <h4 class="card-title">Inserisci la nuova domanda</h4>
+                                            <form method="POST" action="{{route('question.new')}}">
+                                                @csrf
+                                                <div class="form-group">
+                                                    <label for="question">Inserisci la nuova domanda:</label>
+                                                    <textarea minlength="5" class="form-control w-100 mt-1" id="question" name="new_question"
+                                                              placeholder="La tua domanda"></textarea>
+                                                </div>
+                                                <button class="btn btn-primary mt-3">Invia domanda</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-4" v-if="show_answer_panel">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Risposta di @@@volunteer.player_name</h4>
+                                            <p class="card-text fs-5">@@@volunteer.answer</p>
+
+                                            <div class="d-flex">
+                                                <button class="btn btn-primary">Corretta</button>
+                                                <button class="btn btn-danger ms-auto">Sbagliata</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-4 border-start">
+                                    <h3>Lista dei partecipanti:</h3>
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col"></th>
+                                            <th scope="col">Nome</th>
+                                            <th scope="col">Punteggio</th>
+                                            <th scope="col">Eliminato dal turno</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr v-for="player in player_list">
+                                            <td class="align-middle">
+                                                <div class="my_raised_hand fs-3" v-if="player.volunteer">🤚</div>
+                                            </td>
+                                            <td class="align-middle">@{{ player.player_name }}</td>
+                                            <td class="align-middle">@{{ player.score }}</td>
+                                            <td class="align-middle">@{{ player.alreadyAnswered ? '❌' : '' }}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                    @endif
+                    </div>
                 </div>
-
-                <div id="app">
-                    Tempo rimanente: @{{ remaining_time }}
-                    Lista dei partecipanti: @{{ player_list }}
-                </div>
-
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 

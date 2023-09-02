@@ -14,20 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/send_question', function() {
-
-    $question = 'Di che colore era il cavallo bianco di Napoleone?';
-
-    $game = \App\Models\Game::find(1);
-    if (!$game) {
-        $game = new \App\Models\Game();
-        $game->save();
-    }
-
-    event(new \App\Events\SendQuestion('Di che colore era il cavallo bianco di Napoleone?', $game));
-
-});
-
 Route::get('/', function () {
     return redirect()->route('admin');
 });
@@ -39,3 +25,10 @@ Auth::routes([
 ]);
 
 Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');
+
+
+Route::middleware('auth')->group(function () {
+    Route::post('/abort_game', [\App\Http\Controllers\Api\GameController::class, 'abortGame'])->name('game.abort');
+    Route::post('/new_game', [\App\Http\Controllers\Api\GameController::class, 'newGame'])->name('game.new');
+    Route::post('/new_question', [\App\Http\Controllers\Api\GameController::class, 'newQuestion'])->name('question.new');
+});
