@@ -24,13 +24,14 @@ class ConnectionController extends Controller
         if ($game) {
             $currentSession = Session::getCurrentSession($game);
             $current_game = true;
+            $game_id = $game->id;
             $current_session = (bool)$currentSession;
             $remaining_time = $currentSession?$currentSession->getRemainingTimer():0;
             $question = $currentSession?$currentSession->question:"";
             $player_list = $game->getPlayersStatus();
         }
 
-        return response()->json(compact('current_game', 'remaining_time', 'question', 'player_list', 'current_session'));
+        return response()->json(compact('current_game', 'remaining_time', 'question', 'player_list', 'current_session', 'game_id'));
 
     }
 

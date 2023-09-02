@@ -39,7 +39,8 @@ class PlayerController extends Controller
                 'success' => true,
                 'message' => 'Benvenuto nel gioco',
                 'player_id' => Crypt::encrypt($player->id), //questo dato mi serve in front per fare richieste via API, cripto per rendere vagamente più difficile falsificare la propria identita
-                'plain_player_id' => $player->id //mi serve solo per filtrare i players in f/e e sapere chi sono io nella lista
+                'plain_player_id' => $player->id, //mi serve solo per filtrare i players in f/e e sapere chi sono io nella lista
+                'game_id' => $lastOpenedGame->id
             ]);
         }
 
@@ -151,7 +152,9 @@ class PlayerController extends Controller
         //controllo se l'utente ha il diritto di prenotare la risposta
         if (!$session->players->contains($player)) {
             $session->players()->attach($player, ['answer' => $answer, 'timestamp' => time()]);
-            //TODO sparare un evento per notificare della risposta fornita dal player
+
+            //invio un evento per notificare della risposta fornita dal player
+            event(new \App\Events\NewAnswer($player, $answer));
 
         } else {
             return response()->json([
