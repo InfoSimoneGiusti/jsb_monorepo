@@ -14,16 +14,12 @@ class TimeoutSession implements ShouldBroadcast
 
     public $command = 'timeout-session';
 
-    public $id;
-    public $remaining_time;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(Session $session)
+    public function __construct()
     {
-        $this->id = $session->id;
-        $this->remaining_time = 0;
+
     }
 
     /**

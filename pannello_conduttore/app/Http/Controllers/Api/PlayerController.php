@@ -33,7 +33,7 @@ class PlayerController extends Controller
                 'game_id' => $lastOpenedGame->id
             ]);
 
-            event(new \App\Events\NewPlayerSubscribed($player, $lastOpenedGame));
+            event(new \App\Events\RefreshGame());
 
             return response()->json([
                 'success' => true,
@@ -101,7 +101,7 @@ class PlayerController extends Controller
             $session->save();
 
             //ed invio a tutti la notifica per la mano alzata
-            event(new \App\Events\PlayerVolunteer($player, $lastOpenedGame));
+            event(new \App\Events\RefreshGame());
 
         } else {
             return response()->json([
@@ -154,7 +154,7 @@ class PlayerController extends Controller
             $session->players()->attach($player, ['answer' => $answer, 'timestamp' => time()]);
 
             //invio un evento per notificare della risposta fornita dal player
-            event(new \App\Events\NewAnswer($player, $answer));
+            event(new \App\Events\RefreshGame());
 
         } else {
             return response()->json([

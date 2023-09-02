@@ -12,8 +12,10 @@ createApp({
             remaining_time: null,
             player_list: [],
             question: "",
-            current_game: null,
-            current_session: null,
+            game_id: null,
+            session_id: null,
+            volunteer_answer: null,
+            volunteer_name: null,
             show_question_panel: false,
             show_answer_panel: false,
         }
@@ -25,18 +27,7 @@ createApp({
 
     mounted() {
 
-        axios.get('/api/bootstrap_new_connection')
-            .then((response) => {
-                console.log(response);
-                this.remaining_time = response.data.remaining_time;
-                this.current_game = response.data.current_game;
-                this.question = response.data.question;
-                this.player_list = response.data.player_list;
-                this.current_session = response.data.current_session;
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        axios.get('/api/refresh');
 
         const channel = pusher.subscribe('jsb-quiz-game');
 
@@ -45,11 +36,30 @@ createApp({
             this.remaining_time = data.remaining_time;
         });
 
-        channel.bind('players-info', (data) => {
-            console.log(data)
-            this.player_list = data.player_list;
-            this.question = data.question;
+        channel.bind('command', (data) => {
+
+            switch (data.command) {
+                case 'refresh-game':
+                    this.question = data.question;
+                    this.remaining_time = data.remaining_time;
+                    this.player_list = data.player_list;
+                    this.volunteer_answer = data.volunteer_answer;
+                    this.volunteer_name = data.volunteer_name;
+                    this.game_id = data.game_id;
+                    this.session_id = data.session_id;
+                    break;
+                case 'timeout-session':
+                    this.remaining_time = 0;
+                    //TODO resetta interfaccia
+                    break;
+                case 'game-abort':
+                    alert('Il gioco è stato annullato dal conduttore');
+                    //TODO resetta interfaccia
+                    break;
+            }
+
         });
+
     }
 
 }).mount('#app')

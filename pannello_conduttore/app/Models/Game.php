@@ -54,12 +54,21 @@ class Game extends Model
                 ->where('player_id', $player->id)
                 ->sum('correct_answer');
 
+
+            $alreadyAnswered = false;
+            if ($currentSession && $currentSession->players->contains($player)) {
+                $pivotData = $currentSession->players->find($player->id)->pivot;
+                if ($pivotData->correct_answer !== null) {
+                    $alreadyAnswered = true;
+                }
+            }
+
             $result[] = [
                 'plain_player_id' => $player->id,
                 'player_name' => $player->name,
                 'volunteer' => $isVolunteer,
                 'score' => $count,
-                'alreadyAnswered' => $currentSession?$currentSession->players->contains($player):false
+                'alreadyAnswered' => $alreadyAnswered
             ];
         }
 

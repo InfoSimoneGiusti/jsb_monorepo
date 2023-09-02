@@ -24,14 +24,14 @@
 
                             <div class="d-flex">
 
-                                <form method="POST" v-if="!current_game" action="{{route('game.new')}}">
+                                <form method="POST" v-if="game_id == null" action="{{route('game.new')}}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary me-2">Avvia nuovo gioco</button>
                                 </form>
 
-                                <button class="btn btn-primary me-2" v-if="!current_session && current_game" @click="show_question_panel=true" >Fai nuova domanda</button>
+                                <button class="btn btn-primary me-2" v-if="game_id !== null && session_id == null" @click="show_question_panel=true" >Fai nuova domanda</button>
 
-                                <form class="ms-auto" method="POST" v-if="current_game" action="{{route('game.abort')}}" onsubmit="return confirm('Sei sicuro di voler annullare il gioco?')">
+                                <form class="ms-auto" method="POST" v-if="game_id !== null" action="{{route('game.abort')}}" onsubmit="return confirm('Sei sicuro di voler annullare il gioco?')">
                                     @csrf
                                     <button type="submit" class="btn btn-danger">Annulla gioco</button>
                                 </form>
@@ -57,10 +57,10 @@
                                         </div>
                                     </div>
 
-                                    <div class="card mt-4" v-if="show_answer_panel">
+                                    <div class="card mt-4" v-if="volunteer_answer && volunteer_name">
                                         <div class="card-body">
-                                            <h4 class="card-title">Risposta di @@@volunteer.player_name</h4>
-                                            <p class="card-text fs-5">@@@volunteer.answer</p>
+                                            <h4 class="card-title">@{{volunteer_name}} ha risposto: </h4>
+                                            <p class="card-text fs-5">@{{ volunteer_answer }}</p>
 
                                             <div class="d-flex">
                                                 <button class="btn btn-primary">Corretta</button>

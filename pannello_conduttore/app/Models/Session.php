@@ -33,6 +33,10 @@ class Session extends Model
         return $this->belongsToMany(Player::class)->withPivot(['correct_answer', 'timestamp', 'answer']);
     }
 
+    public function volunteer() : BelongsTo {
+        return $this->belongsTo(Player::class, 'volunteer_id', 'id');
+    }
+
     static function getCurrentSession(Game $game) : null | Session {
         return Session::where('game_id', $game->id)->where('closed', false)->first();
     }

@@ -59,7 +59,7 @@ class GameController extends Controller
             ]
         );
 
-        event(new \App\Events\SendQuestion($newSession));
+        event(new \App\Events\RefreshGame());
 
         return redirect()->route('admin');
 

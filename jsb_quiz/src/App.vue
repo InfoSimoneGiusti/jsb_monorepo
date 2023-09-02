@@ -11,6 +11,8 @@ const question = ref(null);
 const remaining_time = ref(0);
 const player_name = ref(null);
 const player_id = ref(null);
+const game_id = ref(null);
+const session_id = ref(null);
 const plain_player_id = ref(null);
 const player_list = ref([]);
 const answer = ref("");
@@ -23,57 +25,45 @@ const volunteer_name = ref("");
 onMounted(() => {
 
   const login = getCookie('login');
+  const parsedLogin = JSON.parse(login);
 
-  if (login) {
-    axios.get('https://jsb.local/api/bootstrap_new_connection')
-        .then((response) => {
-          console.log(response);
-          const parsedLogin = JSON.parse(login);
-          if (parsedLogin.game_id == response.data.game_id) {
-            player_id.value = parsedLogin.player_id;
-            plain_player_id.value = parsedLogin.plain_player_id;
-            player_name.value = parsedLogin.player_name;
-            remaining_time.value = response.data.remaining_time;
-            question.value = response.data.question;
-            player_list.value = response.data.player_list;
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-  }
+  axios.get('https://jsb.local/api/refresh');
 
   const channel = pusher.subscribe('jsb-quiz-game');
 
   channel.bind('command', function (data) {
 
     switch (data.command) {
-      case 'start-session':
+      case 'refresh-game':
         question.value = data.question;
         remaining_time.value = data.remaining_time;
+        player_list.value = data.player_list;
+        volunteer_answer.value = data.volunteer_answer;
+        volunteer_name.value = data.volunteer_name;
+        game_id.value = data.game_id;
+        session_id.value = data.session_id;
+
+        if (parsedLogin.game_id === data.game_id) {
+          player_id.value = parsedLogin.player_id;
+          plain_player_id.value = parsedLogin.plain_player_id;
+          player_name.value = parsedLogin.player_name;
+        }
+
         break;
       case 'timeout-session':
-        remaining_time.value = data.remaining_time;
+        remaining_time.value = 0;
         //TODO resetta interfaccia
         break;
       case 'game-abort':
         alert('Il gioco è stato annullato dal conduttore');
         //TODO resetta interfaccia
         break;
-      case 'answered':
-        volunteer_answer.value = data.answer;
-        volunteer_name.value = data.player_name;
     }
 
   });
 
   channel.bind('tick', function (data) {
     remaining_time.value = data.remaining_time;
-  });
-
-  channel.bind('players-info', function (data) {
-    player_list.value = data.player_list;
-    question.value = data.question;
   });
 
 });
@@ -189,12 +179,14 @@ const isSomeoneVolonteer = computed(() => {
           </button>
           <div v-else class="mt-5">
 
+            {{volunteer_name}}
+            {{volunteer_answer}}
             <div v-if="volunteer_answer && volunteer_name">
               <h4>{{volunteer_name}} ha risposto: {{volunteer_answer}}</h4>
             </div>
 
             <div v-else>
-              <div v-if="isSomeoneVolonteer[0].plain_player_id == plain_player_id && !answered">
+              <div v-if="isSomeoneVolonteer[0].plain_player_id == plain_player_id && !volunteer_answer">
                 <!-- Io mi sono prenotato -->
                 <form @submit.prevent="sendanswer">
                   <div class="form-group">
@@ -250,7 +242,7 @@ const isSomeoneVolonteer = computed(() => {
           <h2 class="fs-5 text-center mb-5">Per partecipare al quiz, inserisci il tuo nome</h2>
 
           <form class="d-flex " @submit.prevent="subscribe">
-            <input class="form-control" type="text" v-model="player_name" @keyup.enter="subscribe"
+            <input class="form-control" type="text" v-model="player_name"
                    placeholder="Come ti chiami?" id="player_name"/>
             <button class="btn btn-primary">Partecipa</button>
           </form>
