@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Game extends Model
 {
@@ -54,7 +55,6 @@ class Game extends Model
                 ->where('player_id', $player->id)
                 ->sum('correct_answer');
 
-
             $alreadyAnswered = false;
             if ($currentSession && $currentSession->players->contains($player)) {
                 $pivotData = $currentSession->players->find($player->id)->pivot;
@@ -71,6 +71,11 @@ class Game extends Model
                 'alreadyAnswered' => $alreadyAnswered
             ];
         }
+
+
+        usort($result, function($a, $b) {
+            return $a['score'] < $b['score'] ? 1 : -1;
+        });
 
         return $result;
 

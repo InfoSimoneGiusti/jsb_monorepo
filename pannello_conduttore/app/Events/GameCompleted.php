@@ -2,24 +2,25 @@
 
 namespace App\Events;
 
-use App\Models\Session;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TimeoutSession implements ShouldBroadcast
+class GameCompleted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $command = 'timeout-session';
+    public $command = 'game-completed';
+
+    public $player_name;
 
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(string $player_name)
     {
-
+        $this->player_name = $player_name;
     }
 
     /**

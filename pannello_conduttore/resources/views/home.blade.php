@@ -24,14 +24,14 @@
 
                             <div class="d-flex">
 
-                                <form method="POST" v-if="game_id == null" action="{{route('game.new')}}">
+                                <form method="POST" v-if="game_id == false" action="{{route('game.new')}}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary me-2">Avvia nuovo gioco</button>
                                 </form>
 
-                                <button class="btn btn-primary me-2" v-if="game_id !== null && session_id == null" @click="show_question_panel=true" >Fai nuova domanda</button>
+                                <button class="btn btn-primary me-2" v-if="game_id !== false && session_id == false" @click="show_question_panel=true" >Fai nuova domanda</button>
 
-                                <form class="ms-auto" method="POST" v-if="game_id !== null" action="{{route('game.abort')}}" onsubmit="return confirm('Sei sicuro di voler annullare il gioco?')">
+                                <form class="ms-auto" method="POST" v-if="game_id !== false" action="{{route('game.abort')}}" onsubmit="return confirm('Sei sicuro di voler annullare il gioco?')">
                                     @csrf
                                     <button type="submit" class="btn btn-danger">Annulla gioco</button>
                                 </form>
@@ -42,6 +42,8 @@
                                 <div class="col-8">
                                     <h2 class="fs-3">Domanda corrente: @{{ question }}</h2>
                                     <h3 class="fs-4">Tempo rimanente: @{{ remaining_time }}</h3>
+                                    <h3 class="fs-4" v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: @{{ volunteer_remaining_time }}</h3>
+
                                     <div class="card mt-4" v-if="show_question_panel">
                                         <div class="card-body" >
                                             <h4 class="card-title">Inserisci la nuova domanda</h4>
@@ -63,8 +65,15 @@
                                             <p class="card-text fs-5">@{{ volunteer_answer }}</p>
 
                                             <div class="d-flex">
-                                                <button class="btn btn-primary">Corretta</button>
-                                                <button class="btn btn-danger ms-auto">Sbagliata</button>
+                                                <form method="post" action="{{route('answer.markright')}}">
+                                                    @csrf
+                                                    <button class="btn btn-primary">Corretta</button>
+                                                </form>
+
+                                                <form method="post" class="ms-auto" action="{{route('answer.markwrong')}}">
+                                                    @csrf
+                                                    <button class="btn btn-danger">Sbagliata</button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>

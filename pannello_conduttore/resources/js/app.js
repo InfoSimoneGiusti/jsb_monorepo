@@ -9,11 +9,12 @@ const { createApp } = Vue
 createApp({
     data() {
         return {
-            remaining_time: null,
+            remaining_time: 0,
+            volunteer_remaining_time: null,
             player_list: [],
             question: "",
-            game_id: null,
-            session_id: null,
+            game_id: false,
+            session_id: false,
             volunteer_answer: null,
             volunteer_name: null,
             show_question_panel: false,
@@ -34,6 +35,7 @@ createApp({
         channel.bind('tick', (data) => {
             console.log(data)
             this.remaining_time = data.remaining_time;
+            this.volunteer_remaining_time = data.volunteer_remaining_time;
         });
 
         channel.bind('command', (data) => {
@@ -42,15 +44,12 @@ createApp({
                 case 'refresh-game':
                     this.question = data.question;
                     this.remaining_time = data.remaining_time;
+                    this.volunteer_remaining_time = data.volunteer_remaining_time;
                     this.player_list = data.player_list;
                     this.volunteer_answer = data.volunteer_answer;
                     this.volunteer_name = data.volunteer_name;
                     this.game_id = data.game_id;
                     this.session_id = data.session_id;
-                    break;
-                case 'timeout-session':
-                    this.remaining_time = 0;
-                    //TODO resetta interfaccia
                     break;
                 case 'game-abort':
                     alert('Il gioco è stato annullato dal conduttore');

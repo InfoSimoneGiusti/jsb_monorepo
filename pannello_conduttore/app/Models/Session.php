@@ -19,6 +19,8 @@ class Session extends Model
         'timestamp',
         'end_timestamp',
         'interrupt_timestamp',
+        'resume_interrupt_timestamp',
+        'end_resume_interrupt_timestamp',
         'closed'
     ];
 
@@ -48,6 +50,22 @@ class Session extends Model
         } else {
             return $this->end_timestamp - $server_time;
         }
+    }
+
+
+    public function getVolunteerRemainingTimer() {
+        $server_time = time();
+
+        if ($this->end_resume_interrupt_timestamp && $this->resume_interrupt_timestamp) {
+            if ($this->interrupt_timestamp) {
+                return $this->end_resume_interrupt_timestamp - $this->resume_interrupt_timestamp;
+            } else {
+                return $this->end_resume_interrupt_timestamp - $server_time;
+            }
+        } else {
+            return null;
+        }
+
     }
 
 }

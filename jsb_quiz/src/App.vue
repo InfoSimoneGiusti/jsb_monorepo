@@ -1,62 +1,82 @@
 <script setup>
+import {createApp} from 'vue';
+import {useToast} from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
 
 import {computed, onMounted, ref} from "vue";
 import axios from 'axios'
+
+
+const $toast = useToast();
 
 var pusher = new Pusher('71ed3d7e2ae1cf985ffd', {
   cluster: 'eu'
 });
 
-const question = ref(null);
+const message = ref(null);
+const question = ref("");
 const remaining_time = ref(0);
+const volunteer_remaining_time = ref(null);
 const player_name = ref(null);
 const player_id = ref(null);
-const game_id = ref(null);
-const session_id = ref(null);
+const game_id = ref(false);
+const session_id = ref(false);
 const plain_player_id = ref(null);
 const player_list = ref([]);
 const answer = ref("");
-const answered = ref(false);
 
-const volunteer_answer = ref("");
-const volunteer_name = ref("");
-
+const volunteer_answer = ref(null);
+const volunteer_name = ref(null);
 
 onMounted(() => {
 
-  const login = getCookie('login');
-  const parsedLogin = JSON.parse(login);
-
-  axios.get('https://jsb.local/api/refresh');
-
   const channel = pusher.subscribe('jsb-quiz-game');
+
+  resetGame();
 
   channel.bind('command', function (data) {
 
     switch (data.command) {
       case 'refresh-game':
+
+        const login = getCookie('login');
+
+        if (login) {
+
+          const parsedLogin = JSON.parse(login);
+
+          if (parsedLogin.game_id === data.game_id) {
+            player_id.value = parsedLogin.player_id;
+            plain_player_id.value = parsedLogin.plain_player_id;
+            player_name.value = parsedLogin.player_name;
+          }
+
+        }
+
         question.value = data.question;
         remaining_time.value = data.remaining_time;
+        volunteer_remaining_time.value = data.volunteer_remaining_time;
         player_list.value = data.player_list;
         volunteer_answer.value = data.volunteer_answer;
         volunteer_name.value = data.volunteer_name;
         game_id.value = data.game_id;
         session_id.value = data.session_id;
+        message.value = data.message;
 
-        if (parsedLogin.game_id === data.game_id) {
-          player_id.value = parsedLogin.player_id;
-          plain_player_id.value = parsedLogin.plain_player_id;
-          player_name.value = parsedLogin.player_name;
+        if (data.message) {
+          $toast.info(data.message);
         }
 
         break;
-      case 'timeout-session':
-        remaining_time.value = 0;
-        //TODO resetta interfaccia
+
+      case 'game-completed':
+        $toast.info(data.player_name + ' vince la partita.');
+        resetGame();
         break;
+
       case 'game-abort':
-        alert('Il gioco è stato annullato dal conduttore');
-        //TODO resetta interfaccia
+        $toast.error('Il gioco è stato annullato dal conduttore');
+        resetGame();
         break;
     }
 
@@ -64,9 +84,31 @@ onMounted(() => {
 
   channel.bind('tick', function (data) {
     remaining_time.value = data.remaining_time;
+    volunteer_remaining_time.value = data.volunteer_remaining_time;
   });
 
 });
+
+const resetGame = () => {
+
+  question.value = "";
+  message.value = null;
+  remaining_time.value = 0;
+  volunteer_remaining_time.value = null;
+
+  player_name.value = null;
+  player_id.value = null;
+  game_id.value = false;
+  session_id.value = false;
+  plain_player_id.value = null;
+  player_list.value = [];
+  answer.value = "";
+  volunteer_answer.value = null;
+  volunteer_name.value = null;
+
+  axios.get('https://jsb.local/api/refresh');
+
+}
 
 
 const sendanswer = () => {
@@ -76,13 +118,13 @@ const sendanswer = () => {
     answer: answer.value
   }).then(function (response) {
     console.log(response);
+
+    answer.value = "";
   })
   .catch(function (error) {
     console.log(error);
     alert(error.response.data.message);
   });
-
-  answered.value = true;
 
 }
 
@@ -154,6 +196,10 @@ const isSomeoneVolonteer = computed(() => {
   return player_list.value.filter((player) => player.volunteer)
 })
 
+const meOnPlayersList = computed(() => {
+  return player_list.value.filter((player) => player.plain_player_id === plain_player_id.value)
+})
+
 </script>
 
 <template>
@@ -173,20 +219,22 @@ const isSomeoneVolonteer = computed(() => {
 
           <h1 class="fs-4">Ciao {{ player_name }}</h1>
           <h2 class="fs-4">Tempo rimasto: {{ remaining_time }} secondi</h2>
+          <h2 class="fs-4" v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: {{ volunteer_remaining_time }} secondi</h2>
           <h3 class="fs-5 pt-2">Domanda: {{ question }}</h3>
-          <button v-if="isSomeoneVolonteer.length === 0" class="btn btn-outline-warning mt-5" @click="volunteer">Voglio
+
+          <h3 v-if="message" class="fs-5 pt-2">{{ message }}</h3>
+
+          <button v-if="isSomeoneVolonteer.length === 0 && session_id !== false && meOnPlayersList.length > 0 && !meOnPlayersList[0].alreadyAnswered" class="btn btn-outline-warning mt-5" @click="volunteer">Voglio
             prenotarmi 🤚
           </button>
           <div v-else class="mt-5">
 
-            {{volunteer_name}}
-            {{volunteer_answer}}
             <div v-if="volunteer_answer && volunteer_name">
               <h4>{{volunteer_name}} ha risposto: {{volunteer_answer}}</h4>
             </div>
 
             <div v-else>
-              <div v-if="isSomeoneVolonteer[0].plain_player_id == plain_player_id && !volunteer_answer">
+              <div v-if="isSomeoneVolonteer.length > 0 && isSomeoneVolonteer[0].plain_player_id == plain_player_id && !volunteer_answer">
                 <!-- Io mi sono prenotato -->
                 <form @submit.prevent="sendanswer">
                   <div class="form-group">
@@ -199,7 +247,7 @@ const isSomeoneVolonteer = computed(() => {
                 </form>
               </div>
 
-              <div class="d-flex align-items-center " v-if="isSomeoneVolonteer[0].plain_player_id != plain_player_id">
+              <div class="d-flex align-items-center " v-if="isSomeoneVolonteer.length > 0 && isSomeoneVolonteer[0].plain_player_id != plain_player_id">
                 <!-- Altri si sono prenotati -->
                 <div class="spinner-border text-warning me-3" role="status"></div>
                 <div class="fs-5">{{ isSomeoneVolonteer[0].player_name }} sta rispondendo...</div>
@@ -252,6 +300,7 @@ const isSomeoneVolonteer = computed(() => {
 
 
     </div>
+
 
 
   </main>

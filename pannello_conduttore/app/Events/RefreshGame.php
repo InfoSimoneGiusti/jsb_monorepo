@@ -23,9 +23,13 @@ class RefreshGame implements ShouldBroadcast
     public $volunteer_id = null;
     public $player_list = [];
     public $remaining_time = 0;
+    public $volunteer_remaining_time = null;
 
-    public function __construct()
+    public $message;
+
+    public function __construct(string $message = null)
     {
+
         $game = Game::getOpenedGame();
         if ($game) {
             $session = Session::getCurrentSession($game);
@@ -46,10 +50,12 @@ class RefreshGame implements ShouldBroadcast
                 }
 
                 $this->remaining_time = $session->getRemainingTimer();
+                $this->volunteer_remaining_time = $session->getVolunteerRemainingTimer();
 
             }
+            $this->player_list = $game->getPlayersStatus();
         }
-        $this->player_list = $game->getPlayersStatus();
+        $this->message = $message;
     }
 
     public function broadcastOn()

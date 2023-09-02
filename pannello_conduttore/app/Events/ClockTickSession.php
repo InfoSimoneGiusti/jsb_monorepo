@@ -14,6 +14,7 @@ class ClockTickSession implements ShouldBroadcast
 
     public $id;
     public $remaining_time;
+    public $volunteer_remaining_time;
 
     /**
      * Create a new event instance.
@@ -22,6 +23,7 @@ class ClockTickSession implements ShouldBroadcast
     {
         $this->id = $session->id??null;
         $this->remaining_time = $session?$session->getRemainingTimer():0;
+        $this->volunteer_remaining_time = $session?$session->getVolunteerRemainingTimer():0;
     }
 
     /**

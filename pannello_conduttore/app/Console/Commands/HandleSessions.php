@@ -38,10 +38,13 @@ class HandleSessions extends Command
         foreach ($sessions as $session) {
 
             event(new \App\Events\ClockTickSession($session));
-            if ($session->end_timestamp <= $server_time) {
+
+            if ($session->end_timestamp <= $server_time ||
+                ($session->end_resume_interrupt_timestamp !== null && $session->end_resume_interrupt_timestamp <= $server_time)
+            ) {
                 $session->closed = true;
                 $session->save();
-                event(new \App\Events\TimeoutSession($session));
+                event(new \App\Events\RefreshGame('Tempo scaduto, nessun vincitore... tra pochi istanti arriva una nuova domanda!'));
             }
         }
 
