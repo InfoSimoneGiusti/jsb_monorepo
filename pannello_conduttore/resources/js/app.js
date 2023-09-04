@@ -9,7 +9,7 @@ const {createApp} = Vue
 const plain_token = document.getElementById('plaintoken');
 
 const instance = axios.create({
-    baseURL: 'https://jsb.local/api/',
+    baseURL: 'https://jsb-admin.simonegiusti.it/api/',
     headers: {'Authorization': 'Bearer ' + plain_token.value}
 });
 
