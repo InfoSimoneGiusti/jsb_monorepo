@@ -78,9 +78,9 @@ class GameController extends Controller
                 'game_id' => $currentGame->id,
                 'volunteer_id' => null,
                 'question' => $new_question,
-                'total_time' => 30, // TODO meglio metterlo in un file in config + .env
+                'total_time' => config('game.timeout'),
                 'timestamp' => time(),
-                'end_timestamp' => time() + 30, // TODO meglio metterlo in un file in config + .env
+                'end_timestamp' => time() + config('game.timeout'),
                 'interrupt_timestamp' => null,
                 'closed' => false
             ]
@@ -106,42 +106,38 @@ class GameController extends Controller
 
             if ($session) {
 
-
                 //se un player si è prenotato per rispondere
-                if ($session->volunteer) {
+                if ($session->volunteer && $session->players->contains($session->volunteer)) {
 
+                    $pivotData = $session->players->find($session->volunteer)->pivot;
+                    $pivotData->correct_answer = true; //assegno il punto al vincitore
+                    $pivotData->save();
+                    $session->closed = true; //chiudo la domanda
+                    $session->save();
 
-                    if ($session && $session->players->contains($session->volunteer)) {
-                        $pivotData = $session->players->find($session->volunteer)->pivot;
-                        $pivotData->correct_answer = true; //assegno il punto al vincitore
-                        $pivotData->save();
-                        $session->closed = true; //chiudo la domanda
-                        $session->save();
+                    //verifico se terminare il gioco
+                    $players_list = $game->getPlayersStatus();
 
-                        //verifico se terminare il gioco
-                        $players_list = $game->getPlayersStatus();
-
-                        $winner = false;
-                        foreach ($players_list as $player) {
-                            if ($player['score'] >= 5) {
-                                $winner = true;
-                            }
+                    $winner = false;
+                    foreach ($players_list as $player) {
+                        if ($player['score'] >= 5) {
+                            $winner = true;
                         }
-
-                        if ($winner) {
-                            $game->closed = true;
-                            $game->save();
-                            event(new \App\Events\GameCompleted($session->volunteer->name));
-                        } else {
-                            event(new \App\Events\RefreshGame($session->volunteer->name . ' ha risposto correttamente!'));
-                        }
-
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'Ok'
-                        ]);
-
                     }
+
+                    if ($winner) {
+                        $game->closed = true;
+                        $game->save();
+                        event(new \App\Events\GameCompleted($session->volunteer->name));
+                    } else {
+                        event(new \App\Events\RefreshGame($session->volunteer->name . ' ha risposto correttamente!'));
+                    }
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Ok'
+                    ]);
+
                 }
             } else {
                 return response()->json([
@@ -150,16 +146,15 @@ class GameController extends Controller
                 ], 403);
             }
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Il gioco non è stato trovato'
-            ], 403);
+            return response()->json(['success' => false,
+                'message' => 'Il gioco non è stato trovato'], 403);
         }
 
     }
 
 
-    public function markAnswerWrong()
+    public
+    function markAnswerWrong()
     {
 
         $game = Game::getOpenedGame();
@@ -215,7 +210,8 @@ class GameController extends Controller
     }
 
 
-    public function disqualify()
+    public
+    function disqualify()
     {
 
         $game = Game::getOpenedGame();
@@ -227,7 +223,6 @@ class GameController extends Controller
             if ($session) {
                 //se un player si è prenotato per rispondere
                 if ($session->volunteer) {
-
 
                     //imposto la risposta come sbagliata
                     $session->players()->attach($session->volunteer, ['answer' => "", 'timestamp' => time(), "correct_answer" => false]);

@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\Log;
 
 class PlayerController extends Controller
 {
+
+    /*
+     * Per identificare il player, da front passo verso il back il player_id. Per miglirare vagamente la sicurezza,
+     * l'id viene criptato quando inviato al player in front e decriptato quando ricevuto dal back
+     * In un contesto applicativo reale, sarebbe il caso di creare un sistema di autenticazione basato su Sanctum o Passport.
+     *
+     * A seguito alla registrazione e al login, il sistema potrebbe identificate il player in modo affidabile.
+     *
+     */
+
     public function subscribe(Request $request) {
 
         $lastOpenedGame = Game::getOpenedGame();
@@ -45,16 +55,6 @@ class PlayerController extends Controller
         }
 
     }
-
-
-    /*
-     * Metodo da chiamare per richiedere di fornire una risposta. Il metodo è molto "ingenuo" e prevede che il partecipante
-     * si identifichi passando il proprio id. In un contesto reale è tassativo creare un sistema di autenticazione robusto
-     * basato su token (Sanctum) o JWT (Passport).
-     *
-     * A seguito alla registrazione e al login, il sistema potrebbe identificarsi in modo affidabile.
-     *
-     */
 
     public function volunteer(Request $request) {
 
@@ -111,7 +111,6 @@ class PlayerController extends Controller
         }
 
     }
-
 
 
     public function newAnswer(Request $request) {
@@ -187,7 +186,9 @@ class PlayerController extends Controller
         $game = Game::getOpenedGame();
 
         if ($game) {
+
             $session = Session::getCurrentSession($game);
+
             if ($session) {
                 if ($session->volunteer_id == $player->id) {
 
@@ -200,7 +201,7 @@ class PlayerController extends Controller
                     $session->interrupt_timestamp = null;
 
                     $session->resume_interrupt_timestamp = time();
-                    $session->end_resume_interrupt_timestamp = time() + 10; //i giocatori potranno nuovamente prenotarsi entro 10 s
+                    $session->end_resume_interrupt_timestamp = time() + config('game.volunteer_timeout'); //i giocatori potranno nuovamente prenotarsi entro 10 s
 
                     $session->save();
 
@@ -229,8 +230,5 @@ class PlayerController extends Controller
 
         return $unique_name;
     }
-
-
-
 
 }

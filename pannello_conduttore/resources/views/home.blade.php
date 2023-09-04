@@ -12,9 +12,11 @@
         <div class="row justify-content-center">
             <div class="col-12">
                 <div class="card">
+
                     <div class="card-header">Area per il conduttore</div>
 
                     <div class="card-body">
+
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">
                                 {{ session('status') }}
@@ -30,6 +32,7 @@
                         <div id="app">
 
                             <div v-cloak>
+
                                 <div class="d-flex" >
 
                                     <form method="POST" v-if="game_id == false" @submit.prevent="newGame()">
@@ -42,10 +45,13 @@
                                         <button type="submit" class="btn btn-danger">Annulla gioco</button>
                                     </form>
                                 </div>
+
                                 <hr>
 
                                 <div class="row">
+
                                     <div class="col-8">
+
                                         <h2 class="fs-3">Domanda corrente: @{{ question }}</h2>
                                         <h3 class="fs-4">Tempo rimanente: @{{ remaining_time }}</h3>
                                         <h3 class="fs-4" v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: @{{ volunteer_remaining_time }}</h3>
@@ -80,6 +86,7 @@
                                                 </div>
                                             </div>
                                         </div>
+
                                     </div>
 
                                     <div class="col-4 border-start">
@@ -105,11 +112,12 @@
                                             </tbody>
                                         </table>
                                     </div>
+
                                 </div>
                             </div>
-
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>

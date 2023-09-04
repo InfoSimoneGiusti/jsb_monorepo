@@ -1,15 +1,14 @@
 <script setup>
-import {createApp} from 'vue';
+
 import {useToast} from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 
 import {computed, onMounted, ref} from "vue";
 import axios from 'axios'
 
-
 const $toast = useToast();
 
-var pusher = new Pusher('71ed3d7e2ae1cf985ffd', {
+var pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
   cluster: 'eu'
 });
 
@@ -31,8 +30,8 @@ const volunteer_name = ref(null);
 onMounted(() => {
 
   window.addEventListener("beforeunload", function (e) {
-    let data = { "player_id": player_id.value, "pippo": 'pluto' };
-    navigator.sendBeacon('https://jsb-admin.simonegiusti.it/api/leave_game', JSON.stringify(data));
+    let data = { "player_id": player_id.value };
+    navigator.sendBeacon(import.meta.env.VITE_BASE_URL+'/api/leave_game', JSON.stringify(data));
   });
 
   const channel = pusher.subscribe('jsb-quiz-game');
@@ -97,14 +96,14 @@ const resetGame = () => {
   volunteer_answer.value = null;
   volunteer_name.value = null;
 
-  axios.get('https://jsb-admin.simonegiusti.it/api/refresh');
+  axios.get(import.meta.env.VITE_BASE_URL+'/api/refresh');
 
 }
 
 
 const sendanswer = () => {
 
-  axios.post('https://jsb-admin.simonegiusti.it/api/send_answer', {
+  axios.post(import.meta.env.VITE_BASE_URL+'/api/send_answer', {
     player_id: player_id.value,
     answer: answer.value
   }).then(function (response) {
@@ -121,7 +120,7 @@ const sendanswer = () => {
 
 const subscribe = () => {
   if (player_name.value.length >= 3) {
-    axios.post('https://jsb-admin.simonegiusti.it/api/subscribe_current_game', {
+    axios.post(import.meta.env.VITE_BASE_URL+'/api/subscribe_current_game', {
       name: player_name.value,
     })
         .then(function (response) {
@@ -141,7 +140,7 @@ const subscribe = () => {
 };
 
 const volunteer = () => {
-  axios.post('https://jsb-admin.simonegiusti.it/api/volunteer', {
+  axios.post(import.meta.env.VITE_BASE_URL+'/api/volunteer', {
     player_id: player_id.value,
   })
       .then(function (response) {
@@ -275,30 +274,22 @@ const meOnPlayersList = computed(() => {
       </div>
 
       <div v-if="game_id && !player_id" class="row justify-content-center">
-
         <div class="col-6 ">
           <h1 class="fs-1 text-center mb-5">Per partecipare al quiz, inserisci il tuo nome</h1>
-
           <form class="d-flex " @submit.prevent="subscribe">
             <input class="form-control" type="text" v-model="player_name"
                    placeholder="Come ti chiami?" id="player_name"/>
             <button class="btn btn-primary">Partecipa</button>
           </form>
-
         </div>
       </div>
 
       <div v-if="!game_id">
-
         <h1 class="fs-1 text-center mb-5">Benvenuto in JSB-Quiz.</h1>
         <h3 class="fs-4 text-center mb-5">Il conduttore non ha ancora avviato il gioco. Appena il gioco inizierà, potrai partecipare.</h3>
-
       </div>
 
-
     </div>
-
-
 
   </main>
 </template>

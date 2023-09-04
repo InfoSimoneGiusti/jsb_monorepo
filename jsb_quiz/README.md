@@ -1,29 +1,29 @@
-# JSB Quiz
+# Avvio del progetto
 
-This template should help get you started developing with Vue 3 in Vite.
+### Prima di seguire questa guida, segui quella indicata nel file README.md del pannello_conduttore!
 
-## Recommended IDE Setup
+## Primo avvio del progetto
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+- Copia il file .env.example che trovi nella root di jsb_quiz e rinominalo in .env
+- Compila il file .env in accordo alla tua configurazione
 
-## Customize configuration
+```
+VITE_PUSHER_KEY=Il valore key che trovi in App Keys di Pusher
+VITE_BASE_URL=Il valore indicato da php artisan serve, di default potrebbe essere http://127.0.0.1:8000
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- Apri un terminale e vai nella root di jsb_quiz, quindi lancia i seguenti comandi:
 
-## Project Setup
-
-```sh
-npm install
+```
+- npm install
+- npm run build
 ```
 
-### Compile and Hot-Reload for Development
+## Avvio del quiz come partecipante
 
-```sh
-npm run dev
+Ogni volta in cui vorrai partecipare al gioco, apri un terminale che punti alla root di jsb_quiz e lancia:
+
+```
+- npm run preview
 ```
 
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+Apri il link indicato dal comando appena lanciato (di default potrebbe essere http://127.0.0.1:4173) e divertiti!

@@ -4,14 +4,15 @@ var pusher = new Pusher('71ed3d7e2ae1cf985ffd', {
     cluster: 'eu'
 });
 
-const {createApp} = Vue
-
 const plain_token = document.getElementById('plaintoken');
 
 const instance = axios.create({
     baseURL: 'https://jsb-admin.simonegiusti.it/api/',
     headers: {'Authorization': 'Bearer ' + plain_token.value}
 });
+
+const {createApp} = Vue
+
 
 createApp({
     data() {
