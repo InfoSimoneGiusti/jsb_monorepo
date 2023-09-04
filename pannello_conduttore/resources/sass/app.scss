@@ -6,3 +6,11 @@
 
 // Bootstrap
 @import 'bootstrap/scss/bootstrap';
+
+[v-cloak] {
+    display: none;
+}
+
+.disqualify {
+    cursor:pointer;
+}

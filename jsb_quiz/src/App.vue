@@ -214,47 +214,58 @@ const meOnPlayersList = computed(() => {
 
     <div class="container mt-5">
 
-      <div v-if="player_id" class="row align-items-start">
+      <div></div>
+
+      <div v-if="player_id && game_id" class="row align-items-start">
+
+        <h1 class="fs-1 text-center mb-5">Ciao {{ player_name }}</h1>
+
         <div class="col-8">
 
-          <h1 class="fs-4">Ciao {{ player_name }}</h1>
-          <h2 class="fs-4">Tempo rimasto: {{ remaining_time }} secondi</h2>
-          <h2 class="fs-4" v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: {{ volunteer_remaining_time }} secondi</h2>
-          <h3 class="fs-5 pt-2">Domanda: {{ question }}</h3>
+          <div v-if="question">
+            <h3 class="fs-2 pt-2">Domanda: {{ question }}</h3>
 
-          <h3 v-if="message" class="fs-5 pt-2">{{ message }}</h3>
+            <p class="pt-3">Tempo rimasto: {{ remaining_time }} secondi</p>
+            <p v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: {{ volunteer_remaining_time }} secondi</p>
 
-          <button v-if="isSomeoneVolonteer.length === 0 && session_id !== false && meOnPlayersList.length > 0 && !meOnPlayersList[0].alreadyAnswered" class="btn btn-outline-warning mt-5" @click="volunteer">Voglio
-            prenotarmi 🤚
-          </button>
-          <div v-else class="mt-5">
+            <button v-if="isSomeoneVolonteer.length === 0 && session_id !== false && meOnPlayersList.length > 0 && !meOnPlayersList[0].alreadyAnswered" class="btn btn-outline-warning mt-5" @click="volunteer">Voglio
+              prenotarmi 🤚
+            </button>
+            <div v-else class="mt-5">
 
-            <div v-if="volunteer_answer && volunteer_name">
-              <h4>{{volunteer_name}} ha risposto: {{volunteer_answer}}</h4>
-            </div>
-
-            <div v-else>
-              <div v-if="isSomeoneVolonteer.length > 0 && isSomeoneVolonteer[0].plain_player_id == plain_player_id && !volunteer_answer">
-                <!-- Io mi sono prenotato -->
-                <form @submit.prevent="sendanswer">
-                  <div class="form-group">
-                    <label for="answer">Inserisci la risposta che ritieni corretta:</label>
-                    <textarea class="form-control w-100 mt-1" id="answer" v-model="answer"
-                              placeholder="La tua risposta"></textarea>
-                  </div>
-                  <button class="btn btn-primary mt-3">Invia risposta</button>
-
-                </form>
+              <div v-if="volunteer_answer && volunteer_name">
+                <h4>{{volunteer_name}} ha risposto: {{volunteer_answer}}</h4>
               </div>
 
-              <div class="d-flex align-items-center " v-if="isSomeoneVolonteer.length > 0 && isSomeoneVolonteer[0].plain_player_id != plain_player_id">
-                <!-- Altri si sono prenotati -->
-                <div class="spinner-border text-warning me-3" role="status"></div>
-                <div class="fs-5">{{ isSomeoneVolonteer[0].player_name }} sta rispondendo...</div>
+              <div v-else>
+                <div v-if="isSomeoneVolonteer.length > 0 && isSomeoneVolonteer[0].plain_player_id == plain_player_id && !volunteer_answer">
+                  <!-- Io mi sono prenotato -->
+                  <form @submit.prevent="sendanswer">
+                    <div class="form-group">
+                      <label for="answer">Inserisci la risposta che ritieni corretta:</label>
+                      <textarea class="form-control w-100 mt-1" id="answer" v-model="answer"
+                                placeholder="La tua risposta"></textarea>
+                    </div>
+                    <button class="btn btn-primary mt-3">Invia risposta</button>
+
+                  </form>
+                </div>
+
+                <div class="d-flex align-items-center " v-if="isSomeoneVolonteer.length > 0 && isSomeoneVolonteer[0].plain_player_id != plain_player_id">
+                  <!-- Altri si sono prenotati -->
+                  <div class="spinner-border text-warning me-3" role="status"></div>
+                  <div class="fs-5">{{ isSomeoneVolonteer[0].player_name }} sta rispondendo...</div>
+                </div>
               </div>
+
             </div>
 
           </div>
+
+          <div v-else>
+            <h3 class="fs-2 pt-2">Attendi che il conduttore faccia una domanda!</h3>
+          </div>
+
         </div>
 
         <div class="col-4">
@@ -284,10 +295,10 @@ const meOnPlayersList = computed(() => {
         </div>
       </div>
 
-      <div v-else class="row justify-content-center">
+      <div v-if="game_id && !player_id" class="row justify-content-center">
 
         <div class="col-6 ">
-          <h2 class="fs-5 text-center mb-5">Per partecipare al quiz, inserisci il tuo nome</h2>
+          <h1 class="fs-1 text-center mb-5">Per partecipare al quiz, inserisci il tuo nome</h1>
 
           <form class="d-flex " @submit.prevent="subscribe">
             <input class="form-control" type="text" v-model="player_name"
@@ -296,6 +307,13 @@ const meOnPlayersList = computed(() => {
           </form>
 
         </div>
+      </div>
+
+      <div v-if="!game_id">
+
+        <h1 class="fs-1 text-center mb-5">Benvenuto in JSB-Quiz.</h1>
+        <h3 class="fs-4 text-center mb-5">Il conduttore non ha ancora avviato il gioco. Appena il gioco inizierà, potrai partecipare.</h3>
+
       </div>
 
 

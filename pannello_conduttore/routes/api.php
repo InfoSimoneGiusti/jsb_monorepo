@@ -25,3 +25,11 @@ Route::get('/refresh', [\App\Http\Controllers\Api\ConnectionController::class, '
 Route::post('/send_answer', [\App\Http\Controllers\Api\PlayerController::class, 'newAnswer'])->name('game.newAnswer');
 
 
+Route::middleware('auth:sanctum')->group(function (): void {
+    Route::post('/abort_game', [\App\Http\Controllers\Api\GameController::class, 'abortGame'])->name('game.abort');
+    Route::post('/new_game', [\App\Http\Controllers\Api\GameController::class, 'newGame'])->name('game.new');
+    Route::post('/new_question', [\App\Http\Controllers\Api\GameController::class, 'newQuestion'])->name('question.new');
+    Route::post('/mark_right', [\App\Http\Controllers\Api\GameController::class, 'markAnswerRight'])->name('answer.markright');
+    Route::post('/mark_wrong', [\App\Http\Controllers\Api\GameController::class, 'markAnswerWrong'])->name('answer.markwrong');
+    Route::post('/disqualify', [\App\Http\Controllers\Api\GameController::class, 'disqualify'])->name('game.disqualify');
+});
