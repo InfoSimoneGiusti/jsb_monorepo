@@ -165,6 +165,54 @@ class PlayerController extends Controller
 
     }
 
+    public function leaveGame(Request $request) {
+
+        $payload = json_decode($request->getContent(),true);
+
+        $player_id_encrypted = $payload['player_id'];
+
+        try {
+            $player_id = Crypt::decrypt($player_id_encrypted);
+        } catch (\Exception $e ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payload non valido... stai tentando di imbrogliare?!'
+            ], 403);
+        }
+
+        $player = Player::find($player_id);
+
+        //verifico se il player che sta lasciando il gioco si è offerto volontario,
+        //se si, prima di cancellarlo dal DB, ripristino il gioco
+        $game = Game::getOpenedGame();
+
+        if ($game) {
+            $session = Session::getCurrentSession($game);
+            if ($session) {
+                if ($session->volunteer_id == $player->id) {
+
+                    $session->volunteer_id = null;
+
+                    $remaining_time = $session->end_timestamp - $session->interrupt_timestamp;
+
+                    $session->end_timestamp = time() + $remaining_time;
+                    $session->timestamp = time();
+                    $session->interrupt_timestamp = null;
+
+                    $session->resume_interrupt_timestamp = time();
+                    $session->end_resume_interrupt_timestamp = time() + 10; //i giocatori potranno nuovamente prenotarsi entro 10 s
+
+                    $session->save();
+
+                }
+            }
+        }
+
+        $player->delete();
+
+        event(new \App\Events\RefreshGame($player->name . ' ha lasciato il gioco'));
+
+    }
 
     protected function calculateName($name, $game_id) {
 
@@ -181,6 +229,7 @@ class PlayerController extends Controller
 
         return $unique_name;
     }
+
 
 
 

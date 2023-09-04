@@ -4,15 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Game;
-use App\Models\Player;
 use App\Models\Session;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class GameController extends Controller
 {
 
-    public function abortGame() {
+    public function abortGame()
+    {
         Game::where('closed', false)->update(['closed' => true]);
         Session::where('closed', false)->update(['closed' => true]);
 
@@ -25,7 +24,8 @@ class GameController extends Controller
 
     }
 
-    public function newGame() {
+    public function newGame()
+    {
 
         if (Game::getOpenedGame()) {
             return response()->json([
@@ -46,7 +46,8 @@ class GameController extends Controller
 
     }
 
-    public function newQuestion(Request $request) {
+    public function newQuestion(Request $request)
+    {
         $new_question = $request->get('new_question');
 
         if (strlen($new_question) < 5) {
@@ -95,7 +96,8 @@ class GameController extends Controller
     }
 
 
-    public function markAnswerRight() {
+    public function markAnswerRight()
+    {
 
         $game = Game::getOpenedGame();
 
@@ -105,10 +107,8 @@ class GameController extends Controller
             if ($session) {
 
 
-
                 //se un player si è prenotato per rispondere
                 if ($session->volunteer) {
-
 
 
                     if ($session && $session->players->contains($session->volunteer)) {
@@ -123,9 +123,9 @@ class GameController extends Controller
 
                         $winner = false;
                         foreach ($players_list as $player) {
-                           if ($player['score'] >= 5) {
-                               $winner = true;
-                           }
+                            if ($player['score'] >= 5) {
+                                $winner = true;
+                            }
                         }
 
                         if ($winner) {
@@ -159,7 +159,8 @@ class GameController extends Controller
     }
 
 
-    public function markAnswerWrong() {
+    public function markAnswerWrong()
+    {
 
         $game = Game::getOpenedGame();
 
@@ -168,12 +169,8 @@ class GameController extends Controller
 
             if ($session) {
 
-
-
                 //se un player si è prenotato per rispondere
                 if ($session->volunteer) {
-
-
 
                     if ($session && $session->players->contains($session->volunteer)) {
                         $pivotData = $session->players->find($session->volunteer)->pivot;
@@ -182,7 +179,7 @@ class GameController extends Controller
 
                         $session->volunteer_id = null;
 
-                        $remaining_time = $session->end_timestamp -  $session->interrupt_timestamp;
+                        $remaining_time = $session->end_timestamp - $session->interrupt_timestamp;
 
                         $session->end_timestamp = time() + $remaining_time;
                         $session->timestamp = time();
@@ -194,7 +191,6 @@ class GameController extends Controller
                         $session->save();
 
                         event(new \App\Events\RefreshGame($session->volunteer->name . ' non ha risposto correttamente, il gioco riprende!'));
-
 
                         return response()->json([
                             'success' => true,
@@ -219,50 +215,43 @@ class GameController extends Controller
     }
 
 
-    public function disqualify() {
+    public function disqualify()
+    {
 
         $game = Game::getOpenedGame();
 
-        Log::emergency('1');
-
         if ($game) {
-            Log::emergency('2');
 
             $session = Session::getCurrentSession($game);
 
             if ($session) {
-                Log::emergency('3');
-
                 //se un player si è prenotato per rispondere
                 if ($session->volunteer) {
-                    Log::emergency('4');
 
-                        Log::emergency('5');
 
-                        //imposto la risposta come sbagliata
-                        $session->players()->attach($session->volunteer, ['answer' => "", 'timestamp' => time(), "correct_answer" => false]);
+                    //imposto la risposta come sbagliata
+                    $session->players()->attach($session->volunteer, ['answer' => "", 'timestamp' => time(), "correct_answer" => false]);
 
-                        //riprendo il gioco come se la risposta fosse errata
-                        $session->volunteer_id = null;
+                    //riprendo il gioco come se la risposta fosse errata
+                    $session->volunteer_id = null;
 
-                        $remaining_time = $session->end_timestamp -  $session->interrupt_timestamp;
+                    $remaining_time = $session->end_timestamp - $session->interrupt_timestamp;
 
-                        $session->end_timestamp = time() + $remaining_time;
-                        $session->timestamp = time();
-                        $session->interrupt_timestamp = null;
+                    $session->end_timestamp = time() + $remaining_time;
+                    $session->timestamp = time();
+                    $session->interrupt_timestamp = null;
 
-                        $session->resume_interrupt_timestamp = time();
-                        $session->end_resume_interrupt_timestamp = time() + 10; //i giocatori potranno nuovamente prenotarsi entro 10 s
+                    $session->resume_interrupt_timestamp = time();
+                    $session->end_resume_interrupt_timestamp = time() + 10; //i giocatori potranno nuovamente prenotarsi entro 10 s
 
-                        $session->save();
+                    $session->save();
 
-                        event(new \App\Events\RefreshGame($session->volunteer->name . ' è stato squalificato dal turno, il gioco riprende!'));
+                    event(new \App\Events\RefreshGame($session->volunteer->name . ' è stato squalificato dal turno, il gioco riprende!'));
 
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'ok'
-                        ]);
-
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'ok'
+                    ]);
 
                 }
             } else {

@@ -30,6 +30,11 @@ const volunteer_name = ref(null);
 
 onMounted(() => {
 
+  window.addEventListener("beforeunload", function (e) {
+    let data = { "player_id": player_id.value, "pippo": 'pluto' };
+    navigator.sendBeacon('https://jsb.local/api/leave_game', JSON.stringify(data));
+  });
+
   const channel = pusher.subscribe('jsb-quiz-game');
 
   resetGame();
@@ -38,20 +43,6 @@ onMounted(() => {
 
     switch (data.command) {
       case 'refresh-game':
-
-        const login = getCookie('login');
-
-        if (login) {
-
-          const parsedLogin = JSON.parse(login);
-
-          if (parsedLogin.game_id === data.game_id) {
-            player_id.value = parsedLogin.player_id;
-            plain_player_id.value = parsedLogin.plain_player_id;
-            player_name.value = parsedLogin.player_name;
-          }
-
-        }
 
         question.value = data.question;
         remaining_time.value = data.remaining_time;
@@ -128,29 +119,6 @@ const sendanswer = () => {
 
 }
 
-const setCookie =  (cname, cvalue, exdays) => {
-  const d = new Date();
-  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-  let expires = "expires="+d.toUTCString();
-  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-}
-
-const getCookie = (cname) => {
-  let name = cname + "=";
-  let ca = document.cookie.split(';');
-  for(let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
-}
-
-
 const subscribe = () => {
   if (player_name.value.length >= 3) {
     axios.post('https://jsb.local/api/subscribe_current_game', {
@@ -160,13 +128,6 @@ const subscribe = () => {
           console.log(response);
           player_id.value = response.data.player_id;
           plain_player_id.value = response.data.plain_player_id;
-
-          setCookie('login', JSON.stringify({
-            player_id: response.data.player_id,
-            plain_player_id: response.data.plain_player_id,
-            player_name: player_name.value,
-            game_id: response.data.game_id,
-          }), 365);
 
         })
         .catch(function (error) {
@@ -222,11 +183,19 @@ const meOnPlayersList = computed(() => {
 
         <div class="col-8">
 
-          <div v-if="question">
+          <div v-if="question" class="card p-3">
             <h3 class="fs-2 pt-2">Domanda: {{ question }}</h3>
+            <p class="pt-3">Tempo totale rimasto:</p>
+            <div class="progress" role="progressbar">
+              <div class="progress-bar" :style="'width: '+ (Math.floor(100/30*remaining_time)) + '%'">{{ remaining_time }}s</div>
+            </div>
 
-            <p class="pt-3">Tempo rimasto: {{ remaining_time }} secondi</p>
-            <p v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: {{ volunteer_remaining_time }} secondi</p>
+            <div v-if="volunteer_remaining_time !== null">
+              <p class="pt-3">Tempo per una nuova prenotazione:</p>
+              <div class="progress" role="progressbar">
+                <div class="progress-bar bg-warning" :style="'width: '+ (Math.floor(100/10*volunteer_remaining_time)) + '%'">{{ volunteer_remaining_time }}s</div>
+              </div>
+            </div>
 
             <button v-if="isSomeoneVolonteer.length === 0 && session_id !== false && meOnPlayersList.length > 0 && !meOnPlayersList[0].alreadyAnswered" class="btn btn-outline-warning mt-5" @click="volunteer">Voglio
               prenotarmi 🤚
@@ -262,35 +231,45 @@ const meOnPlayersList = computed(() => {
 
           </div>
 
-          <div v-else>
-            <h3 class="fs-2 pt-2">Attendi che il conduttore faccia una domanda!</h3>
+          <div class="card d-flex flex-row align-items-center p-3 justify-content-center" v-else>
+            <span class="spinner-border text-info me-3" role="status"></span>
+            <span class="fs-2">Attendi che il conduttore faccia una domanda!</span>
           </div>
 
         </div>
 
         <div class="col-4">
-          <h2 class="fs-5 mb-3">Lista dei partecipanti:</h2>
 
-          <table class="table">
-            <thead>
-            <tr>
-              <th scope="col"></th>
-              <th scope="col">Nome</th>
-              <th scope="col">Punteggio</th>
-              <th scope="col">Eliminato dal turno</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="player in player_list">
-              <td class="align-middle">
-                <div class="my_raised_hand fs-3" v-if="player.volunteer">🤚</div>
-              </td>
-              <td class="align-middle">{{ player.player_name }}</td>
-              <td class="align-middle">{{ player.score }}</td>
-              <td class="align-middle">{{ player.alreadyAnswered ? '❌' : '' }}</td>
-            </tr>
-            </tbody>
-          </table>
+          <div class="card p-3">
+
+            <h2 class="fs-5 mb-3">Lista dei partecipanti:</h2>
+
+            <table class="table">
+              <thead>
+              <tr>
+                <th scope="col"></th>
+                <th scope="col">Nome</th>
+                <th scope="col">Punteggio</th>
+                <th scope="col">Eliminato dal turno</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="player in player_list">
+                <td class="align-middle">
+                  <div class="my_raised_hand fs-3" v-if="player.volunteer">🤚</div>
+                </td>
+                <td class="align-middle">{{ player.player_name }}</td>
+                <td class="align-middle">{{ player.score }}</td>
+                <td class="align-middle">{{ player.alreadyAnswered ? '❌' : '' }}</td>
+              </tr>
+              </tbody>
+            </table>
+
+            <div class="alert alert-warning" role="alert">
+              <strong>Non chiudere il browser</strong> per non perdere i progressi nel quiz!
+            </div>
+
+          </div>
 
         </div>
       </div>

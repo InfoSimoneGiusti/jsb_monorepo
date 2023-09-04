@@ -23,6 +23,7 @@ Route::post('/subscribe_current_game', [\App\Http\Controllers\Api\PlayerControll
 Route::post('/volunteer', [\App\Http\Controllers\Api\PlayerController::class, 'volunteer'])->name('game.volunteer');
 Route::get('/refresh', [\App\Http\Controllers\Api\ConnectionController::class, 'refreshGame'])->name('system.refresh');
 Route::post('/send_answer', [\App\Http\Controllers\Api\PlayerController::class, 'newAnswer'])->name('game.newAnswer');
+Route::post('/leave_game', [\App\Http\Controllers\Api\PlayerController::class, 'leaveGame'])->name('player.leaveGame');
 
 
 Route::middleware('auth:sanctum')->group(function (): void {
