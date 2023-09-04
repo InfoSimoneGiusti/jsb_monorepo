@@ -32,7 +32,7 @@ onMounted(() => {
 
   window.addEventListener("beforeunload", function (e) {
     let data = { "player_id": player_id.value, "pippo": 'pluto' };
-    navigator.sendBeacon('https://jsb.local/api/leave_game', JSON.stringify(data));
+    navigator.sendBeacon('https://jsb-admin.simonegiusti.it/api/leave_game', JSON.stringify(data));
   });
 
   const channel = pusher.subscribe('jsb-quiz-game');
@@ -97,14 +97,14 @@ const resetGame = () => {
   volunteer_answer.value = null;
   volunteer_name.value = null;
 
-  axios.get('https://jsb.local/api/refresh');
+  axios.get('https://jsb-admin.simonegiusti.it/api/refresh');
 
 }
 
 
 const sendanswer = () => {
 
-  axios.post('https://jsb.local/api/send_answer', {
+  axios.post('https://jsb-admin.simonegiusti.it/api/send_answer', {
     player_id: player_id.value,
     answer: answer.value
   }).then(function (response) {
@@ -121,7 +121,7 @@ const sendanswer = () => {
 
 const subscribe = () => {
   if (player_name.value.length >= 3) {
-    axios.post('https://jsb.local/api/subscribe_current_game', {
+    axios.post('https://jsb-admin.simonegiusti.it/api/subscribe_current_game', {
       name: player_name.value,
     })
         .then(function (response) {
@@ -141,7 +141,7 @@ const subscribe = () => {
 };
 
 const volunteer = () => {
-  axios.post('https://jsb.local/api/volunteer', {
+  axios.post('https://jsb-admin.simonegiusti.it/api/volunteer', {
     player_id: player_id.value,
   })
       .then(function (response) {
