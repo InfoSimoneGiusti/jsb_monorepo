@@ -1,4 +1,4 @@
-# Avvio del progetto
+# Avvio del progetto 
 
 ### Prima di seguire questa guida, segui quella indicata nel file README.md del pannello_conduttore!
 
