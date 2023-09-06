@@ -52,9 +52,11 @@
 
                                     <div class="col-8">
 
-                                        <h2 class="fs-3">Domanda corrente: @{{ question }}</h2>
-                                        <h3 class="fs-4">Tempo rimanente: @{{ remaining_time }}</h3>
-                                        <h3 class="fs-4" v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: @{{ volunteer_remaining_time }}</h3>
+                                        <div v-if="game_id !== false && session_id !== false">
+                                            <h2 class="fs-3">Domanda corrente: @{{ question }}</h2>
+                                            <h3 class="fs-4">Tempo rimanente: @{{ remaining_time }}</h3>
+                                            <h3 class="fs-4" v-if="volunteer_remaining_time !== null">Tempo rimasto da precedente prenotazione: @{{ volunteer_remaining_time }}</h3>
+                                        </div>
 
                                         <div class="card mt-4" v-if="show_question_panel">
                                             <div class="card-body" >
