@@ -2,7 +2,16 @@
 
 ### Segui questa guida prima di seguire quella indicata nel file README.md di jsb_quiz
 
+# Prerequisiti
+- php8.2 accessibile da path e funzionante da CLI + dipendenze necessarie installate
+- mysql
+- composer 
+- node versione >= 16
+
+## Primi passi
+
 - Crea un nuovo database MySQL
+- Clona il monorepo da Github in una cartella locale del computer 
 - Copia il file .env.example che trovi nella root di pannello_conduttore e rinominalo in .env
 
 ## Configura il file .env appena creato
@@ -40,7 +49,7 @@ Nella prima riga, riporta
 - In un terminale che punti alla root del progetto lancia i seguenti comandi
 
 ```
-- composer install
+- composer install // in caso di ulteriori dipendenze necessarie, in questa fase sarà nesessario configurare il computer secondo necessità
 - npm install
 - php artisan key:generate
 - php artisan migrate
