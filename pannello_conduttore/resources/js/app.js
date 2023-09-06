@@ -1,13 +1,15 @@
 import './bootstrap';
+console.log(import.meta.env);
 
-var pusher = new Pusher('71ed3d7e2ae1cf985ffd', {
+
+var pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
     cluster: 'eu'
 });
 
 const plain_token = document.getElementById('plaintoken');
 
 const instance = axios.create({
-    baseURL: 'https://jsb-admin.simonegiusti.it/api/',
+    baseURL: import.meta.env.VITE_BASE_URL + '/api/',
     headers: {'Authorization': 'Bearer ' + plain_token.value}
 });
 
